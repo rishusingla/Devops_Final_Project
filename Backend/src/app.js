@@ -10,12 +10,13 @@ const app = express();
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 
-app.use(
-  cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:5173",
-    credentials: true,
-  }),
-);
+app.use(cors({
+  origin: [
+    "https://devops-final-project.vercel.app",
+    "https://devops-final-project-git-main-rishusinglas-projects.vercel.app"
+  ],
+  credentials: true
+}))
 app.use(express.json());
 app.use(cookieParser());
 
