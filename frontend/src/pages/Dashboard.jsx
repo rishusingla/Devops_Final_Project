@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import styles from "./Dashboard.module.css";
+import socket from "../socket";
 import { getDeployments, getHealthMetrics, getLogs } from "../services/api";
 
 const chartDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -71,7 +72,7 @@ export default function Dashboard() {
     }
    loadDashboard();
 
-// socket realtime listener
+//  realtime listener
 socket.on("newDeployment", (data) => {
   console.log("Realtime deployment:", data);
 
