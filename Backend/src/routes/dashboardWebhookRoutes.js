@@ -20,10 +20,7 @@ router.post("/dashboard", async (req, res) => {
       timestamp,
       status,
     } = req.body;
-     await Deployment.updateMany(
-  { status: "in-progress" },
-  { status: "success" }
-);
+
     const environment =
       branch === "main"
         ? "production"
@@ -32,68 +29,34 @@ router.post("/dashboard", async (req, res) => {
           : "development";
 
     const deploymentStatus =
-  status === "success"
-    ? "success"
-    : status === "failed"
-      ? "failed"
-      : status === "running"
-        ? "in-progress"
-        : "pending";
+      status === "success"
+        ? "success"
+        : status === "failed"
+          ? "failed"
+          : "pending";
 
     const shortCommitId = commit_id ? commit_id.slice(0, 7) : "N/A";
 
-   let deployment;
-
-// PENDING → create deployment
-if (status === "pending") {
-  deployment = await Deployment.create({
-    serviceName: project_name || repository || "unknown-repo",
-    version: branch || "latest",
-    commitId: shortCommitId,
-    environment,
-    status: "pending",
-    duration: 0,
-    owner: developer || "unknown",
-    region: "ap-south-1",
-    deployedAt: timestamp || new Date(),
-  });
-}
-
-// RUNNING → update same deployment
-else if (status === "running") {
-  deployment = await Deployment.findOneAndUpdate(
-    {
+    const deployment = await Deployment.create({
+      serviceName: project_name || repository || "unknown-repo",
+      version: branch || "latest",
       commitId: shortCommitId,
-    },
-    {
-      status: "in-progress",
-    },
-    { new: true }
-  );
-}
+      environment,
+      status: deploymentStatus,
+      duration: deploymentStatus === "success" ? 120 : 0,
+      owner: developer || "unknown",
+      region: "ap-south-1",
+      deployedAt: timestamp || new Date(),
+    });
 
-// SUCCESS / FAILED → update same deployment
-else if (status === "success" || status === "failed") {
-  deployment = await Deployment.findOneAndUpdate(
-    {
-      commitId: shortCommitId,
-    },
-    {
-      status: status === "success" ? "success" : "failed",
-      duration: 120,
-    },
-    { new: true }
-  );
-}
-    
-    const log= await Log.create({
+    await Log.create({
       level: deploymentStatus === "failed" ? "error" : "info",
       service: project_name || repository || "unknown-repo",
       message: `${commit_message || "Workflow update received"} | Repo: ${repository_full_name || repository || "unknown"} | Branch: ${branch || "unknown"} | Status: ${deploymentStatus}`,
       traceId: shortCommitId,
       environment,
     });
-      global.io.emit("newLog", log);
+
     const activeDeploys = await Deployment.countDocuments({
       status: "in-progress",
     });
