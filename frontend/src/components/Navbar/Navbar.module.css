@@ -303,7 +303,10 @@
 .menuIcon  { font-size: 15px; flex-shrink: 0; }
 .menuItemDanger { color: #ef4444; padding: 10px 16px; margin: 4px 0; }
 .menuItemDanger:hover { background: rgba(239, 68, 68, 0.08); color: #ef4444; }
-
+.menuItem {
+  text-decoration: none;
+  color: inherit;
+}
 /* Search Modal */
 .overlay {
   position: fixed;

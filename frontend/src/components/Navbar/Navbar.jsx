@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, NavLink } from "react-router-dom";
 import { toast } from "react-toastify";
 import { logout, getMe } from "../../services/api";
 import {
@@ -414,7 +414,7 @@ function Navbar({ expanded, toggleTheme, theme, setExpanded }) {
                   <div className={styles.profileAvatar}>{avatarText}</div>
                   <div>
                     <p className={styles.profileName}>
-                      {currentUser?.username || "Kajal"}
+                      {currentUser?.username || "rishu"}
                     </p>
                     <p className={styles.profileRole}>
                       {currentUser?.email || "Frontend Developer"}
@@ -423,14 +423,14 @@ function Navbar({ expanded, toggleTheme, theme, setExpanded }) {
                 </div>
                 <div className={styles.dropdownDivider} />
                 <div className={styles.menuList}>
-                  <div className={styles.menuItem}>
-                    <BsPersonCircle className={styles.menuIcon} />
+                  <NavLink to="/profile" className={styles.menuItem}>
+                    <BsGear className={styles.menuIcon} />
                     <span>Profile</span>
-                  </div>
-                  <div className={styles.menuItem}>
+                  </NavLink>
+                  <NavLink to="/settings" className={styles.menuItem}>
                     <BsGear className={styles.menuIcon} />
                     <span>Settings</span>
-                  </div>
+                  </NavLink>
                   <div className={styles.menuItem} onClick={toggleTheme}>
                     {theme === "dark" ? (
                       <BsSun className={styles.menuIcon} />
