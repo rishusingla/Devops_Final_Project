@@ -32,6 +32,9 @@ jobs:
       - name: Simulate work
         run: echo "Workflow running"
 
+      - name: Force fail
+        run: exit 1
+
       - name: Notify success
         if: success()
         env:
