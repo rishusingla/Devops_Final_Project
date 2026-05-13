@@ -42,46 +42,18 @@ router.post("/dashboard", async (req, res) => {
 
     const shortCommitId = commit_id ? commit_id.slice(0, 7) : "N/A";
 
-    // const deployment = await Deployment.create({
-    //   serviceName: project_name || repository || "unknown-repo",
-    //   version: branch || "latest",
-    //   commitId: shortCommitId,
-    //   environment,
-    //   status: deploymentStatus,
-    //   duration: deploymentStatus === "success" ? 120 : 0,
-    //   owner: developer || "unknown",
-    //   region: "ap-south-1",
-    //   deployedAt: timestamp || new Date(),
-    // });
-    let deployment;
-
-if (status === "running") {
-  deployment = await Deployment.create({
-    serviceName: project_name || repository || "unknown-repo",
-    version: branch || "latest",
-    commitId: shortCommitId,
-    environment,
-    status: "in-progress",
-    duration: 0,
-    owner: developer || "unknown",
-    region: "ap-south-1",
-    deployedAt: timestamp || new Date(),
-  });
-}
-
-else if (status === "success" || status === "failed") {
-  deployment = await Deployment.findOneAndUpdate(
-    {
+    const deployment = await Deployment.create({
+      serviceName: project_name || repository || "unknown-repo",
+      version: branch || "latest",
       commitId: shortCommitId,
-      status: "in-progress",
-    },
-    {
-      status: status === "success" ? "success" : "failed",
-      duration: 120,
-    },
-    { new: true }
-  );
-}
+      environment,
+      status: deploymentStatus,
+      duration: deploymentStatus === "success" ? 120 : 0,
+      owner: developer || "unknown",
+      region: "ap-south-1",
+      deployedAt: timestamp || new Date(),
+    });
+    
     const log= await Log.create({
       level: deploymentStatus === "failed" ? "error" : "info",
       service: project_name || repository || "unknown-repo",
