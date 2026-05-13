@@ -20,7 +20,10 @@ router.post("/dashboard", async (req, res) => {
       timestamp,
       status,
     } = req.body;
-
+     await Deployment.updateMany(
+  { status: "in-progress" },
+  { status: "success" }
+);
     const environment =
       branch === "main"
         ? "production"
@@ -33,7 +36,7 @@ router.post("/dashboard", async (req, res) => {
         ? "success"
         : status === "failed"
           ? "failed"
-          : "pending";
+          : "in-progress";
 
     const shortCommitId = commit_id ? commit_id.slice(0, 7) : "N/A";
 
