@@ -25,15 +25,19 @@ jobs:
             "commit_url": "${{ github.event.head_commit.url }}",
             "commit_id": "${{ github.sha }}",
             "timestamp": "${{ github.event.head_commit.timestamp }}",
-            "status": "pending"
+            "status": "running"
           }' \
           $WEBHOOK_URL
 
+      # - name: Simulate work
+      #   run: echo "Workflow running"
+      
       - name: Simulate work
-        run: echo "Workflow running"
+        run: sleep 20
 
-      - name: Force fail
-        run: exit 1
+        # for failure
+      # - name: Force fail
+      #   run: exit 1
 
       - name: Notify success
         if: success()
