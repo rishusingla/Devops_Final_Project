@@ -20,22 +20,10 @@ router.post("/dashboard", async (req, res) => {
       timestamp,
       status,
     } = req.body;
-
-    // Ignore pending to avoid duplicate entries
-    if (status === "pending") {
-      return res.status(200).json({
-        message: "Pending status ignored",
-      });
-    }
-
-    // Mark previous running deployments as success
-    if (status === "success") {
-      await Deployment.updateMany(
-        { status: "in-progress" },
-        { status: "success" },
-      );
-    }
-
+     await Deployment.updateMany(
+  { status: "in-progress" },
+  { status: "success" }
+);
     const environment =
       branch === "main"
         ? "production"
@@ -44,68 +32,75 @@ router.post("/dashboard", async (req, res) => {
           : "development";
 
     const deploymentStatus =
-      status === "success"
-        ? "success"
-        : status === "failed"
-          ? "failed"
-          : status === "running"
-            ? "in-progress"
-            : "pending";
+  status === "success"
+    ? "success"
+    : status === "failed"
+      ? "failed"
+      : status === "running"
+        ? "in-progress"
+        : "pending";
 
-    const shortCommitId = commit_id
-      ? commit_id.slice(0, 7)
-      : "N/A";
+    const shortCommitId = commit_id ? commit_id.slice(0, 7) : "N/A";
 
-    // Create deployment
-    const deployment = await Deployment.create({
-      serviceName: project_name || repository || "unknown-repo",
-      version: branch || "latest",
+    // const deployment = await Deployment.create({
+    //   serviceName: project_name || repository || "unknown-repo",
+    //   version: branch || "latest",
+    //   commitId: shortCommitId,
+    //   environment,
+    //   status: deploymentStatus,
+    //   duration: deploymentStatus === "success" ? 120 : 0,
+    //   owner: developer || "unknown",
+    //   region: "ap-south-1",
+    //   deployedAt: timestamp || new Date(),
+    // });
+    let deployment;
+
+if (status === "running") {
+  deployment = await Deployment.create({
+    serviceName: project_name || repository || "unknown-repo",
+    version: branch || "latest",
+    commitId: shortCommitId,
+    environment,
+    status: "in-progress",
+    duration: 0,
+    owner: developer || "unknown",
+    region: "ap-south-1",
+    deployedAt: timestamp || new Date(),
+  });
+}
+
+else if (status === "success" || status === "failed") {
+  deployment = await Deployment.findOneAndUpdate(
+    {
       commitId: shortCommitId,
-      environment,
-      status: deploymentStatus,
-      duration: deploymentStatus === "success" ? 120 : 0,
-      owner: developer || "unknown",
-      region: "ap-south-1",
-      deployedAt: timestamp || new Date(),
-    });
-
-    // Create log
-    const log = await Log.create({
+      status: "in-progress",
+    },
+    {
+      status: status === "success" ? "success" : "failed",
+      duration: 120,
+    },
+    { new: true }
+  );
+}
+    const log= await Log.create({
       level: deploymentStatus === "failed" ? "error" : "info",
       service: project_name || repository || "unknown-repo",
-      message: `${
-        commit_message || "Workflow update received"
-      } | Repo: ${
-        repository_full_name || repository || "unknown"
-      } | Branch: ${
-        branch || "unknown"
-      } | Status: ${deploymentStatus}`,
+      message: `${commit_message || "Workflow update received"} | Repo: ${repository_full_name || repository || "unknown"} | Branch: ${branch || "unknown"} | Status: ${deploymentStatus}`,
       traceId: shortCommitId,
       environment,
     });
-
-    // Emit realtime log
-    global.io.emit("newLog", log);
-
-    // Metrics
+      global.io.emit("newLog", log);
     const activeDeploys = await Deployment.countDocuments({
       status: "in-progress",
     });
-
-    const criticalErrors = await Log.countDocuments({
-      level: "error",
-    });
+    const criticalErrors = await Log.countDocuments({ level: "error" });
 
     const load = await si.currentLoad();
     const memory = await si.mem();
 
     const cpuUsage = Math.round(load.currentLoad);
+    const memoryUsage = Math.round((memory.used / memory.total) * 100);
 
-    const memoryUsage = Math.round(
-      (memory.used / memory.total) * 100,
-    );
-
-    // Store metrics
     await SystemMetrics.create({
       cpuUsage,
       memoryUsage,
@@ -119,9 +114,7 @@ router.post("/dashboard", async (req, res) => {
       deployment,
     });
   } catch (error) {
-    res.status(500).json({
-      message: error.message,
-    });
+    res.status(500).json({ message: error.message });
   }
 });
 
