@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import styles from "./Logs.module.css";
 import { getLogs } from "../services/api";
+import socket from "../socket";
 
 const levelClasses = {
   info: "infoLevel",
@@ -32,6 +33,14 @@ export default function Logs() {
     }
 
     loadLogs();
+    socket.on("newLog", (newLog) => {
+  console.log("Live log received:", newLog);
+
+  setLogs((prev) => [newLog, ...prev]);
+});
+return () => {
+  socket.off("newLog");
+};
   }, []);
 
   useEffect(() => {

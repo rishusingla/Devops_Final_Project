@@ -28,14 +28,12 @@ router.post("/dashboard", async (req, res) => {
           ? "staging"
           : "development";
 
-   const deploymentStatus =
-  status === "success"
-    ? "success"
-    : status === "failed"
-    ? "failed"
-    : status === "running"
-    ? "in-progress"
-    : "pending";
+    const deploymentStatus =
+      status === "success"
+        ? "success"
+        : status === "failed"
+          ? "failed"
+          : "pending";
 
     const shortCommitId = commit_id ? commit_id.slice(0, 7) : "N/A";
 
@@ -50,15 +48,15 @@ router.post("/dashboard", async (req, res) => {
       region: "ap-south-1",
       deployedAt: timestamp || new Date(),
     });
-    global.io.emit("newDeployment", deployment);
-    await Log.create({
+    
+    const log= await Log.create({
       level: deploymentStatus === "failed" ? "error" : "info",
       service: project_name || repository || "unknown-repo",
       message: `${commit_message || "Workflow update received"} | Repo: ${repository_full_name || repository || "unknown"} | Branch: ${branch || "unknown"} | Status: ${deploymentStatus}`,
       traceId: shortCommitId,
       environment,
     });
-
+      global.io.emit("newLog", log);
     const activeDeploys = await Deployment.countDocuments({
       status: "in-progress",
     });
