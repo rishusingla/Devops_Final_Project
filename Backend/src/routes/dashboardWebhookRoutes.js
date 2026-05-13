@@ -32,11 +32,13 @@ router.post("/dashboard", async (req, res) => {
           : "development";
 
     const deploymentStatus =
-      status === "success"
-        ? "success"
-        : status === "failed"
-          ? "failed"
-          : "in-progress";
+  status === "success"
+    ? "success"
+    : status === "failed"
+      ? "failed"
+      : status === "running"
+        ? "in-progress"
+        : "pending";
 
     const shortCommitId = commit_id ? commit_id.slice(0, 7) : "N/A";
 
