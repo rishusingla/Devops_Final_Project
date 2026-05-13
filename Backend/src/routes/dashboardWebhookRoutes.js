@@ -48,7 +48,7 @@ router.post("/dashboard", async (req, res) => {
       region: "ap-south-1",
       deployedAt: timestamp || new Date(),
     });
-
+    global.io.emit("newDeployment", deployment);
     await Log.create({
       level: deploymentStatus === "failed" ? "error" : "info",
       service: project_name || repository || "unknown-repo",

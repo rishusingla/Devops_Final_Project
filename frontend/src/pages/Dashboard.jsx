@@ -69,12 +69,25 @@ export default function Dashboard() {
         setLoading(false);
       }
     }
-    loadDashboard();
-    const interval = setInterval(() => {
-    loadDashboard(); // refresh every 5 sec
-  }, 5000);
+   loadDashboard();
 
-  return () => clearInterval(interval); 
+// socket realtime listener
+socket.on("newDeployment", (data) => {
+  console.log("Realtime deployment:", data);
+
+  loadDashboard();
+});
+
+// optional fallback refresh
+const interval = setInterval(() => {
+  loadDashboard();
+}, 5000);
+
+return () => {
+  clearInterval(interval);
+
+  socket.off("newDeployment");
+};
   }, []);
 
   const successCount = deployments.filter((item) => item.status === "success").length;
