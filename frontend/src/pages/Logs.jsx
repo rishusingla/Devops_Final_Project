@@ -39,7 +39,7 @@ export default function Logs() {
   setLogs((prev) => [newLog, ...prev]);
 });
 return () => {
-  socket.off("newLog ");
+  socket.off("newLog");
 };
   }, []);
 
