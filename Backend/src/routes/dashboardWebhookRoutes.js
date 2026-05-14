@@ -86,7 +86,7 @@ if (existingDeployment) {
     });
 
     const activeDeploys = await Deployment.countDocuments({
-     status: { $in: ["pending", "in-progress"] }
+      status: "in-progress",
     });
     const criticalErrors = await Log.countDocuments({ level: "error" });
 
