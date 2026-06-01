@@ -113,7 +113,7 @@ function Sidebar({ expanded, setExpanded }) {
 
           {expanded && (
             <div className={styles.logoText}>
-              <p className={styles.logoName}>DevOps</p>
+              <p className={styles.logoName}>DevSight</p>
               <p className={styles.logoSub}>Control Panel</p>
             </div>
           )}

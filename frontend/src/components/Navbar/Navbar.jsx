@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { BsEyeFill } from "react-icons/bs";
 import { useNavigate, NavLink } from "react-router-dom";
 import { toast } from "react-toastify";
 import { logout, getMe } from "../../services/api";
@@ -246,11 +247,27 @@ function Navbar({ expanded, toggleTheme, theme, setExpanded }) {
           </button>
         )}
 
-        <div className={styles.left} />
+        <div className={styles.left} >
+         {!expanded && (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: "8px",
+      }}
+    >
+      <BsEyeFill size={22} />
+      <h2 style={{ margin: 0, fontSize: "22px", fontWeight: "700" }}>
+        DevSight
+      </h2>
+    </div>
+  )}
+  </div>
 
         <div className={styles.searchWrapper}>
           <div className={styles.search} onClick={openSearch}>
             <BsSearch className={styles.searchIcon} />
+            
             <span className={styles.searchPlaceholder}>
               Search commands, logs, deployments...
             </span>
